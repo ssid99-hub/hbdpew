@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Inwepo Fireworks</title>
+   <style>
+   * {
+      margin: 0;
+      padding: 0;
+   }
+
+   body {
+      background-color: black;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+   }
+
+   h1 {
+      margin-top: 2%;
+      font-size: 50px;
+   }
+
+   .media-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+   }
+
+   .center-img {
+      width: 180px;
+      height: 320px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid white;
+   }
+
+   .video {
+      width: 180px;
+      height: 320px;
+      border: 4px solid white;
+      border-radius: 20px;
+      object-fit: cover;
+   }
+
+   .marquee-container {
+      margin-top: 20px;
+      font-size: 18px;
+   }
+   </style>
+</head>
+<body>
+
+
+   <div class="media-container">
+      <img src="ChatGPT Image Jul 12, 2025, 02_18_25 PM.png" alt="Foto Ulang Tahun" class="center-img">
+      <video class="video" controls autoplay loop>
+         <source src="snaptik_7492774407291653431.mp4" type="video/mp4">
+         Browser Anda tidak mendukung pemutaran video.
+      </video>
+   </div>
+
+   <h1>HBD broh!</h1>
+
+   <div class="marquee-container">
+      <marquee scrollamount="5" width="80%" behavior="alternate">
+         Hbd Pew. Semoga panjang umur, murah rejeki, dan sehat selalu. 
+      </marquee>
+   </div>
+
+   <!-- Fireworks Script -->
+   <script>
+   var rnd = Math.random, flr = Math.floor;
+   let canvas = document.createElement('canvas');
+   document.body.appendChild(canvas);
+   canvas.style.position = 'absolute';
+   canvas.style.top = 0;
+   canvas.style.left = 0;
+   canvas.style.zIndex = -1;
+   canvas.width = window.innerWidth;
+   canvas.height = window.innerHeight;
+
+   let ctx = canvas.getContext('2d');
+
+   function rndNum(num) {
+      return rnd() * num + 1;
+   }
+
+   function vector(x, y) {
+      this.x = x;
+      this.y = y;
+      this.add = function(vec2) {
+         this.x += vec2.x;
+         this.y += vec2.y;
+      }
+   }
+
+   function particle(pos, vel) {
+      this.pos = new vector(pos.x, pos.y);
+      this.vel = vel;
+      this.finish = false;
+      this.start = 0;
+
+      this.update = function(time) {
+         let timeSpan = time - this.start;
+         if (timeSpan > 500) this.finish = true;
+         if (!this.finish) {
+            this.pos.add(this.vel);
+            this.vel.y += gravity;
+         }
+      };
+
+      this.draw = function() {
+         if (!this.finish) drawDot(this.pos.x, this.pos.y, 1);
+      }
+   }
+
+   function firework(x, y) {
+      this.pos = new vector(x, y);
+      this.vel = new vector(0, -rndNum(10) - 3);
+      this.color = 'hsl(' + rndNum(360) + ', 100%, 50%)';
+      this.size = 4;
+      this.finish = false;
+      this.start = 0;
+      let exParticles = [], exPLen = 100;
+      let rootShow = true;
+
+      this.update = function(time) {
+         if (this.finish) return;
+         rootShow = this.vel.y < 0;
+
+         if (rootShow) {
+            this.pos.add(this.vel);
+            this.vel.y += gravity;
+         } else {
+            if (exParticles.length === 0) {
+               flash = true;
+               for (let i = 0; i < exPLen; i++) {
+                  let vel = new vector(-rndNum(10) + 5, -rndNum(10) + 5);
+                  let p = new particle(this.pos, vel);
+                  p.start = time;
+                  exParticles.push(p);
+               }
+            }
+
+            let countFinish = 0;
+            for (let i = 0; i < exPLen; i++) {
+               let p = exParticles[i];
+               p.update(time);
+               if (p.finish) countFinish++;
+            }
+
+            if (countFinish === exPLen) this.finish = true;
+         }
+      }
+
+      this.draw = function() {
+         if (this.finish) return;
+         ctx.fillStyle = this.color;
+         if (rootShow) {
+            drawDot(this.pos.x, this.pos.y, this.size);
+         } else {
+            for (let p of exParticles) p.draw();
+         }
+      }
+   }
+
+   function drawDot(x, y, size) {
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.closePath();
+   }
+
+   let fireworks = [], gravity = 0.2, flash = false;
+
+   function init() {
+      for (let i = 0; i < 20; i++) {
+         fireworks.push(new firework(rndNum(canvas.width), canvas.height));
+      }
+   }
+
+   function update(time) {
+      for (let fw of fireworks) fw.update(time);
+   }
+
+   function draw(time) {
+      update(time);
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < fireworks.length; i++) {
+         if (fireworks[i].finish) {
+            fireworks[i] = new firework(rndNum(canvas.width), canvas.height);
+            fireworks[i].start = time;
+         }
+         fireworks[i].draw();
+      }
+      window.requestAnimationFrame(draw);
+   }
+
+   window.addEventListener('resize', function() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+   });
+
+   init();
+   draw();
+   </script>
+</body>
+</html>
